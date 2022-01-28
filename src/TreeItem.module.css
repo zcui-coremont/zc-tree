@@ -1,0 +1,7 @@
+.treeItem {
+  width: 100%;
+}
+
+.treeItemHighlighted {
+  background-color: lightpink;
+}
