@@ -5,4 +5,10 @@ module.exports = {
   core: {
     builder: "storybook-builder-vite",
   },
+  async viteFinal(config) {
+    // customize the Vite config here
+    config.base = "/zc-tree/";
+
+    return config;
+  },
 };
