@@ -5,46 +5,53 @@ import React, {
   useEffect,
   MouseEvent,
   useCallback,
+  useContext,
 } from "react";
+import { TreeContext } from "./TreeContext";
 
 import styles from "./TreeItem.module.css";
 import { useControlled } from "./utils/useControlled";
 
 export interface TreeItemData {
   label: string;
-  children?: TreeItemData[];
+  children?: this[];
 }
 
+/** Computed states */
 export interface TreeItemState {
   highlighted?: boolean;
   selected?: boolean;
   expanded?: boolean;
-  // hasChild?: boolean;
+  hasChild?: boolean;
+  depth?: number;
 }
 
-export interface TreeItemProps<T extends TreeItemData>
-  extends TreeItemState,
-    HTMLAttributes<HTMLDivElement> {
+export interface TreeItemProps<T extends TreeItemData> // TreeItemState,
+  extends HTMLAttributes<HTMLDivElement> {
   // expose `classes` to make styles customizable. Or not use css module
   data: T; // Generics to make sure custom TreeItem can use more data
   defaultExpanded?: boolean;
   // itemComponent? ...
-  depth?: number;
-  path?: string;
+  path: string;
 }
 
 export const TreeItem = <T extends TreeItemData>({
   data,
   defaultExpanded,
-  expanded: expandedProp,
-  highlighted,
-  depth = 0,
   onClick: onClickProp,
   onKeyDown: onKeyDownProp,
-  path = "0",
-  selected,
+  path,
   ...restProps
 }: TreeItemProps<T>) => {
+  const treeState = useContext(TreeContext);
+  console.log(path, treeState[path]);
+  const {
+    expanded: expandedProp,
+    hasChild,
+    selected,
+    depth = 0,
+    highlighted,
+  } = treeState[path];
   const [expanded, setIsExpanded] = useControlled({
     controlled: expandedProp,
     default: defaultExpanded,
@@ -54,15 +61,16 @@ export const TreeItem = <T extends TreeItemData>({
   const leafNode = !data.children?.length;
   const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
 
-  const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    setIsExpanded((x) => !x);
-    onClickProp?.(e);
-  }, []);
+  // const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+  //   setIsExpanded((x) => !x);
+  //   onClickProp?.(e);
+  // }, []);
   return (
     <div role="group" {...restProps}>
       <div
         className={cn(styles.treeItem, {
           [styles.treeItemHighlighted]: highlighted,
+          [styles.treeItemSelected]: selected,
           [styles.treeItemLeaf]: leafNode,
         })}
         role="treeitem"
@@ -70,7 +78,7 @@ export const TreeItem = <T extends TreeItemData>({
         data-treeitem-path={path}
         // Used in CSS to indent
         data-treeitem-depth={depth}
-        onClick={handleClick}
+        // onClick={handleClick}
         // Implement roving tabindex
         tabIndex={highlighted ? 1 : 0}
       >
@@ -82,8 +90,8 @@ export const TreeItem = <T extends TreeItemData>({
             <TreeItem
               key={`${d.label}-${i}`}
               data={d}
-              depth={depth + 1}
-              path={`${path}-${depth + 1}`}
+              // depth={depth + 1}
+              path={`${path}-${i}`}
               defaultExpanded={defaultExpanded}
             />
           ))
