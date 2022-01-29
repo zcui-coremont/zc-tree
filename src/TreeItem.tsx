@@ -6,6 +6,7 @@ import React, {
   MouseEvent,
   useCallback,
   useContext,
+  useRef,
 } from "react";
 import { TreeContext } from "./TreeContext";
 
@@ -45,7 +46,7 @@ export const TreeItem = <T extends TreeItemData>({
   ...restProps
 }: TreeItemProps<T>) => {
   const treeState = useContext(TreeContext);
-  console.log(path, treeState[path]);
+  // console.log(path, treeState[path]);
   const {
     expanded: expandedProp,
     hasChild,
@@ -61,6 +62,13 @@ export const TreeItem = <T extends TreeItemData>({
   });
   const leafNode = !data.children?.length;
   const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
+  const itemRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (highlighted && itemRef.current) {
+      console.log("focus item", path);
+      itemRef.current.focus();
+    }
+  }, [highlighted]);
 
   // const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
   //   setIsExpanded((x) => !x);
@@ -82,7 +90,8 @@ export const TreeItem = <T extends TreeItemData>({
         data-treeitem-id={data.id}
         // onClick={handleClick}
         // Implement roving tabindex
-        tabIndex={highlighted ? 1 : 0}
+        tabIndex={highlighted ? 0 : -1}
+        ref={itemRef}
       >
         {icon}
         {data.label}
