@@ -11,10 +11,20 @@ export default {
 } as ComponentMeta<typeof Tree>;
 
 const exampleData: TreeItemData[] = [
-  { label: "Item A", children: [{ label: "Child 1" }, { label: "Child 2" }] },
-  { label: "Item A" },
+  {
+    label: "Item A",
+    children: [
+      {
+        label: "Child A1",
+        children: [{ label: "Child A11" }, { label: "Child A12" }],
+      },
+      { label: "Child A2" },
+    ],
+  },
+  { label: "Item B" },
+  { label: "Item C", children: [{ label: "Child C1" }, { label: "Child C2" }] },
 ];
 
 export const Example: ComponentStory<typeof Tree> = () => (
-  <Tree data={exampleData} />
+  <Tree data={exampleData} defaultExpanded />
 );
