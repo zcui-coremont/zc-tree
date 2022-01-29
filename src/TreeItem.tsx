@@ -14,6 +14,7 @@ import { useControlled } from "./utils/useControlled";
 
 export interface TreeItemData {
   label: string;
+  id: string;
   children?: this[];
 }
 
@@ -78,6 +79,7 @@ export const TreeItem = <T extends TreeItemData>({
         data-treeitem-path={path}
         // Used in CSS to indent
         data-treeitem-depth={depth}
+        data-treeitem-id={data.id}
         // onClick={handleClick}
         // Implement roving tabindex
         tabIndex={highlighted ? 1 : 0}

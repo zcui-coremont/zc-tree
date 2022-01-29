@@ -12,9 +12,10 @@ import styles from "./Tree.module.css";
 import { initState, reducer } from "./TreeReducer";
 import { TreeContext } from "./TreeContext";
 export interface TreeProps<T extends TreeItemData = TreeItemData>
-  extends HTMLAttributes<HTMLDivElement> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onClick"> {
   data: T[];
   defaultExpanded?: boolean;
+  onClick?: (e: MouseEvent<HTMLDivElement>, itemId?: string) => void;
 }
 
 export const Tree = <T extends TreeItemData = TreeItemData>({
@@ -35,7 +36,7 @@ export const Tree = <T extends TreeItemData = TreeItemData>({
     if (treeitemPath) {
       dispatch({ type: "click", path: treeitemPath });
     }
-    onClickProp?.(e);
+    onClickProp?.(e, (e.target as HTMLDivElement).dataset.treeitemId);
   }, []);
   return (
     <div
