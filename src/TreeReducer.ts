@@ -10,7 +10,9 @@ type State = {
   stateMap: TreeStateMap;
 };
 
-type Action = { type: "click"; path: string; } | { type: "keydown"; path: string; key: string; };
+type Action = { type: "click"; path: string; } |
+{ type: "keydown"; path: string; key: string; } |
+{ type: 'initState'; data: TreeItemData[]; defaultExpanded?: boolean };
 
 export function initState<T extends TreeItemData>(
   data: T[],
@@ -247,8 +249,11 @@ export function reducer(state: State, action: Action): State {
         }
         // Do nothing at a leaf node
       }
-
       return state;
+    }
+    case "initState": {
+      console.log("new initState")
+      return initState(action.data, action.defaultExpanded);
     }
   }
 }

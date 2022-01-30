@@ -2,12 +2,12 @@ import cn from "classnames";
 import React, {
   HTMLAttributes,
   useReducer,
-  Context,
   useCallback,
   MouseEvent,
   KeyboardEvent,
+  useEffect,
 } from "react";
-import { TreeItem, TreeItemData, TreeItemState } from "./TreeItem";
+import { TreeItem, TreeItemData } from "./TreeItem";
 
 import styles from "./Tree.module.css";
 import { initState, reducer } from "./TreeReducer";
@@ -32,6 +32,9 @@ export const Tree = <T extends TreeItemData = TreeItemData>({
     reducer,
     initState(data, defaultExpanded)
   );
+  useEffect(() => {
+    dispatch({ type: "initState", data, defaultExpanded });
+  }, [data, defaultExpanded]);
   const handleClick = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
       console.log("click", (e.target as HTMLDivElement).dataset);
@@ -68,12 +71,7 @@ export const Tree = <T extends TreeItemData = TreeItemData>({
     >
       <TreeContext.Provider value={stateMap}>
         {data.map((x, i) => (
-          <TreeItem
-            key={`${x.label}-${i}`}
-            data={x}
-            defaultExpanded={defaultExpanded}
-            path={i.toString()}
-          />
+          <TreeItem key={`${x.label}-${i}`} data={x} path={i.toString()} />
         ))}
       </TreeContext.Provider>
     </div>

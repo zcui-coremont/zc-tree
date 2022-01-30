@@ -32,14 +32,12 @@ export interface TreeItemProps<T extends TreeItemData> // TreeItemState,
   extends HTMLAttributes<HTMLDivElement> {
   // expose `classes` to make styles customizable. Or not use css module
   data: T; // Generics to make sure custom TreeItem can use more data
-  defaultExpanded?: boolean;
   // itemComponent? ...
   path: string;
 }
 
 export const TreeItem = <T extends TreeItemData>({
   data,
-  defaultExpanded,
   onClick: onClickProp,
   onKeyDown: onKeyDownProp,
   path,
@@ -47,19 +45,15 @@ export const TreeItem = <T extends TreeItemData>({
 }: TreeItemProps<T>) => {
   const treeState = useContext(TreeContext);
   // console.log(path, treeState[path]);
+  const itemState = treeState[path];
   const {
-    expanded: expandedProp,
+    expanded,
     hasChild,
     selected,
     depth = 0,
     highlighted,
-  } = treeState[path];
-  const [expanded, setIsExpanded] = useControlled({
-    controlled: expandedProp,
-    default: defaultExpanded,
-    name: "TreeItem",
-    state: "expanded",
-  });
+  } = itemState || {}; // {} when data is empty
+
   const leafNode = !data.children?.length;
   const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
   const itemRef = useRef<HTMLDivElement>(null);
@@ -68,12 +62,15 @@ export const TreeItem = <T extends TreeItemData>({
       console.log("focus item", path);
       itemRef.current.focus();
     }
-  }, [highlighted]);
+  }, [highlighted, path]);
 
   // const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
   //   setIsExpanded((x) => !x);
   //   onClickProp?.(e);
   // }, []);
+  if (itemState === undefined) {
+    return null;
+  }
   return (
     <div role="group" {...restProps}>
       <div
@@ -103,7 +100,6 @@ export const TreeItem = <T extends TreeItemData>({
               data={d}
               // depth={depth + 1}
               path={`${path}-${i}`}
-              defaultExpanded={defaultExpanded}
             />
           ))
         : null}
