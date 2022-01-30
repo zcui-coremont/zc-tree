@@ -21,7 +21,6 @@
 }
 
 .treeItem {
-  width: 100%;
   --tree-item-indent-base: 16px;
   padding-inline-start: var(--tree-item-depth, 0px);
 }

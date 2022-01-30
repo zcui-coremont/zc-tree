@@ -20,22 +20,24 @@ export function initState<T extends TreeItemData>(
   const innerLoopData = (x: T, i: number, depth: number, path: string) => {
     const newPath = path + "-" + i.toString();
     const newDepth = depth + 1;
+    const hasChild = !!x.children?.length;
     stateMap[newPath] = {
       highlighted: false,
       selected: false,
-      expanded: defaultExpanded,
-      hasChild: !!x.children?.length,
+      expanded: hasChild && defaultExpanded,
+      hasChild,
       depth: newDepth,
     };
     x.children?.forEach((child, index) => innerLoopData(child, index, newDepth, newPath));
   };
   const firstLoopData = (x: T, i: number) => {
     const path = i.toString();
+    const hasChild = !!x.children?.length;
     stateMap[path] = {
       highlighted: false,
       selected: false,
-      expanded: defaultExpanded,
-      hasChild: !!x.children?.length,
+      expanded: hasChild && defaultExpanded,
+      hasChild,
       depth: 0,
     };
     x.children?.forEach((child, index) => innerLoopData(child, index, 0, i.toString()));
@@ -69,6 +71,28 @@ const selectNode = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
   return newStateMap;
 }
 
+const findNextVisibleNodePath = (stateMap: TreeStateMap, fromPath: string) => {
+  if (stateMap[fromPath].expanded) {
+    return fromPath + '-0';
+  } else {
+    // Example for the following, start with `fromPath` "2-3-1" -> [2, 3, 1]
+    const fromPathArray = fromPath.split('-').map(p => Number.parseInt(p));
+    while (fromPathArray.length > 0) {
+      // Remove the last index, i.e. 1, return it
+      const fromPathLastIndex = fromPathArray.splice(fromPathArray.length - 1, 1)[0];
+      // Compute next one at the same level, i.e. "2-3-2"
+      const nextPathInSameLevel = [...fromPathArray, (fromPathLastIndex + 1)].join('-')
+      // Check whether next one in the same level exist
+      if (stateMap[nextPathInSameLevel]) {
+        return nextPathInSameLevel;
+      }
+      // Doesn't exist, move up one level, continue loop
+    }
+  }
+  // return the current one if at the end
+  return fromPath;
+}
+
 const hightlightNext = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
   const newStateMap: TreeStateMap = { ...stateMap };
   const allPaths = Object.keys(stateMap).sort();
@@ -80,14 +104,40 @@ const hightlightNext = (stateMap: TreeStateMap, nodePath: string): TreeStateMap 
   const pathIndex = allPaths.indexOf(nodePath);
   if (pathIndex < 0) {
     console.error(nodePath, 'cannot be found in', allPaths);
+    return newStateMap;
   }
-  // FIXME: over simplify here, only works when all nodes are expanded
-  const nextPath = allPaths[pathIndex + 1];
+  const nextPath = findNextVisibleNodePath(stateMap, nodePath);
 
   newStateMap[nodePath] = { ...newStateMap[nodePath], highlighted: false }
   newStateMap[nextPath] = { ...newStateMap[nextPath], highlighted: true }
 
   return newStateMap;
+}
+
+const findPreviousVisibleNodePath = (stateMap: TreeStateMap, sortedAllPaths: string[], fromPath: string) => {
+  if (fromPath === '0') {
+    return '0';
+  }
+  const pathIndex = sortedAllPaths.indexOf(fromPath);
+  if (pathIndex < 0) {
+    return fromPath;
+  }
+  // This node might be hidden by its ancester 
+  const potentialPreviousPath = sortedAllPaths[pathIndex - 1];
+  // Example "2-3-1" -> [2, 3, 1]
+  const potentialPathArray = potentialPreviousPath.split('-').map(p => Number.parseInt(p));
+
+  // start with '2'
+  let parentToCheck = potentialPathArray[0].toString();
+  // check all ancesters (hence -1 in for loop) whether expanded
+  for (let i = 0; i < potentialPathArray.length - 1; i++) {
+    if (!stateMap[parentToCheck].expanded) {
+      return parentToCheck
+    }
+    parentToCheck = `${parentToCheck}-${potentialPathArray[i + 1]}`
+  }
+  // if all ancester expanded, than this one is the visible
+  return potentialPreviousPath;
 }
 
 const hightlightPrev = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
@@ -101,9 +151,10 @@ const hightlightPrev = (stateMap: TreeStateMap, nodePath: string): TreeStateMap 
   const pathIndex = allPaths.indexOf(nodePath);
   if (pathIndex < 0) {
     console.error(nodePath, 'cannot be found in', allPaths);
+    return newStateMap;
   }
-  // FIXME: over simplify here, only works when all nodes are expanded
-  const prevPath = allPaths[pathIndex - 1];
+
+  const prevPath = findPreviousVisibleNodePath(stateMap, allPaths, nodePath);
 
   newStateMap[nodePath] = { ...newStateMap[nodePath], highlighted: false }
   newStateMap[prevPath] = { ...newStateMap[prevPath], highlighted: true }
