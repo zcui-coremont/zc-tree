@@ -21,16 +21,18 @@
 }
 
 .treeItem {
+  outline-offset: 3px;
   --tree-item-indent-base: 16px;
   padding-inline-start: var(--tree-item-depth, 0px);
 }
 
 .treeItemHighlighted {
-  background-color: lightpink;
+  background-color: lightblue;
 }
 
 .treeItemSelected {
-  background-color: mediumslateblue;
+  background-color: darkblue;
+  color: white;
 }
 
 .treeItemLeaf {

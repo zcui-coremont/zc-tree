@@ -162,6 +162,49 @@ const hightlightPrev = (stateMap: TreeStateMap, nodePath: string): TreeStateMap 
   return newStateMap;
 }
 
+const collapseNode = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
+  const newStateMap: TreeStateMap = { ...stateMap };
+  newStateMap[nodePath] = { ...newStateMap[nodePath], expanded: false };
+  return newStateMap;
+}
+
+const expandNode = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
+  const newStateMap: TreeStateMap = { ...stateMap };
+  newStateMap[nodePath] = { ...newStateMap[nodePath], expanded: true };
+  return newStateMap;
+}
+
+const findParentNodePath = (nodePath: string) => {
+  const fromPathArray = nodePath.split('-').map(p => Number.parseInt(p));
+  if (fromPathArray.length === 1) {
+    // return self as this is the highest level
+    return nodePath;
+  } else {
+    fromPathArray.splice(fromPathArray.length - 1, 1)[0];
+    return [...fromPathArray].join('-');
+  }
+}
+
+const highlightParentNode = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
+  const newStateMap: TreeStateMap = { ...stateMap };
+  const parentNodePath = findParentNodePath(nodePath);
+  newStateMap[nodePath] = { ...newStateMap[nodePath], highlighted: false };
+  newStateMap[parentNodePath] = { ...newStateMap[parentNodePath], highlighted: true };
+  return newStateMap;
+}
+
+
+const highlightFirstChildNode = (stateMap: TreeStateMap, nodePath: string): TreeStateMap => {
+  const newStateMap: TreeStateMap = { ...stateMap };
+  const potentialFirstChildPath = nodePath + '-0';
+  if (newStateMap[potentialFirstChildPath] !== undefined) {
+    newStateMap[nodePath] = { ...newStateMap[nodePath], highlighted: false };
+    newStateMap[potentialFirstChildPath] = { ...newStateMap[potentialFirstChildPath], highlighted: true };
+  }
+  return newStateMap;
+}
+
+
 
 export function reducer(state: State, action: Action): State {
   // console.log(action);
@@ -183,6 +226,26 @@ export function reducer(state: State, action: Action): State {
       } else if (action.key === 'ArrowUp') {
         const newStateMap = hightlightPrev(state.stateMap, action.path);
         return { stateMap: newStateMap };
+      } else if (action.key === 'ArrowLeft') {
+        if (state.stateMap[action.path].expanded) {
+          const newStateMap = collapseNode(state.stateMap, action.path);
+          return { stateMap: newStateMap };
+        } else {
+          // Leaf node or collapsed node
+          const newStateMap = highlightParentNode(state.stateMap, action.path);
+          return { stateMap: newStateMap };
+        }
+      } else if (action.key === 'ArrowRight') {
+        if (state.stateMap[action.path].hasChild) {
+          if (state.stateMap[action.path].expanded) {
+            const newStateMap = highlightFirstChildNode(state.stateMap, action.path);
+            return { stateMap: newStateMap };
+          } else {
+            const newStateMap = expandNode(state.stateMap, action.path);
+            return { stateMap: newStateMap };
+          }
+        }
+        // Do nothing at a leaf node
       }
 
       return state;
