@@ -1,5 +1,13 @@
 import cn from "classnames";
-import React, { HTMLAttributes, useEffect, useContext, useRef } from "react";
+import React, {
+  HTMLAttributes,
+  useEffect,
+  useContext,
+  useRef,
+  forwardRef,
+  ReactNode,
+  ForwardedRef,
+} from "react";
 import { TreeContext } from "./TreeContext";
 
 import styles from "./TreeItem.module.css";
@@ -19,6 +27,48 @@ export interface TreeItemState {
   depth?: number;
 }
 
+export interface BasicTreeItemNodeProps<T extends TreeItemData>
+  extends TreeItemState,
+    HTMLAttributes<HTMLDivElement> {
+  data: T;
+  treeFocused?: boolean;
+}
+
+const BasicTreeItemNodeBase = <T extends TreeItemData>(
+  {
+    highlighted,
+    selected,
+    expanded,
+    hasChild,
+    depth,
+    data,
+    treeFocused,
+    ...restProps
+  }: BasicTreeItemNodeProps<T>,
+  ref: ForwardedRef<HTMLDivElement>
+) => {
+  const leafNode = !data.children?.length;
+  const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
+
+  return (
+    <div
+      className={cn(styles.treeItem, {
+        [styles.treeItemHighlighted]: highlighted && treeFocused,
+        [styles.treeItemSelected]: selected,
+        [styles.treeItemLeaf]: leafNode,
+      })}
+      {...restProps}
+      ref={ref}
+    >
+      {icon}
+      {data.label}
+    </div>
+  );
+};
+
+export const BasicTreeItemNode = forwardRef(BasicTreeItemNodeBase);
+BasicTreeItemNode.displayName = "BasicTreeItemNode";
+
 export interface TreeItemProps<T extends TreeItemData> // TreeItemState,
   extends HTMLAttributes<HTMLDivElement> {
   // expose `classes` to make styles customizable. Or not use css module
@@ -33,12 +83,9 @@ export const TreeItem = <T extends TreeItemData>({
   ...restProps
 }: TreeItemProps<T>) => {
   const { stateMap, focused } = useContext(TreeContext);
-  // console.log(path, treeState[path]);
   const itemState = stateMap[path];
   const { expanded, selected, depth = 0, highlighted } = itemState || {}; // {} when data is empty
 
-  const leafNode = !data.children?.length;
-  const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
   const itemRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (focused && highlighted && itemRef.current) {
@@ -52,16 +99,16 @@ export const TreeItem = <T extends TreeItemData>({
   //   onClickProp?.(e);
   // }, []);
   if (itemState === undefined) {
+    console.warn("item null", itemState, path);
     return null;
   }
   return (
     <div role="group" {...restProps}>
-      <div
-        className={cn(styles.treeItem, {
-          [styles.treeItemHighlighted]: focused && highlighted,
-          [styles.treeItemSelected]: selected,
-          [styles.treeItemLeaf]: leafNode,
-        })}
+      <BasicTreeItemNode
+        treeFocused={focused}
+        data={data}
+        {...itemState}
+        ref={itemRef}
         role="treeitem"
         // Used in Tree callback to determine item
         data-treeitem-path={path}
@@ -71,11 +118,7 @@ export const TreeItem = <T extends TreeItemData>({
         // onClick={handleClick}
         // Implement roving tabindex
         tabIndex={highlighted ? 0 : -1}
-        ref={itemRef}
-      >
-        {icon}
-        {data.label}
-      </div>
+      />
       {expanded && data.children
         ? data.children.map((d, i) => (
             <TreeItem
