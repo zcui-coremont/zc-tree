@@ -153,7 +153,6 @@ export const Example: ComponentStory<typeof Tree> = (args) => {
   const handleClick = (_: unknown, itemId?: string) => {
     console.log("Item clicked Id", itemId);
   };
-  console.log({ args });
   return <Tree {...args} data={exampleData} onClick={handleClick} />;
 };
 

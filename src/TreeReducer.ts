@@ -36,7 +36,7 @@ export function initState<T extends TreeItemData>(
     const path = i.toString();
     const hasChild = !!x.children?.length;
     stateMap[path] = {
-      highlighted: false,
+      highlighted: i === 0,
       selected: false,
       expanded: hasChild && defaultExpanded,
       hasChild,

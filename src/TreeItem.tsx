@@ -32,20 +32,20 @@ export const TreeItem = <T extends TreeItemData>({
   path,
   ...restProps
 }: TreeItemProps<T>) => {
-  const treeState = useContext(TreeContext);
+  const { stateMap, focused } = useContext(TreeContext);
   // console.log(path, treeState[path]);
-  const itemState = treeState[path];
+  const itemState = stateMap[path];
   const { expanded, selected, depth = 0, highlighted } = itemState || {}; // {} when data is empty
 
   const leafNode = !data.children?.length;
   const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
   const itemRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (highlighted && itemRef.current) {
+    if (focused && highlighted && itemRef.current) {
       console.log("focus item", path);
       itemRef.current.focus();
     }
-  }, [highlighted, path]);
+  }, [highlighted, path, focused]);
 
   // const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
   //   setIsExpanded((x) => !x);
@@ -58,7 +58,7 @@ export const TreeItem = <T extends TreeItemData>({
     <div role="group" {...restProps}>
       <div
         className={cn(styles.treeItem, {
-          [styles.treeItemHighlighted]: highlighted,
+          [styles.treeItemHighlighted]: focused && highlighted,
           [styles.treeItemSelected]: selected,
           [styles.treeItemLeaf]: leafNode,
         })}

@@ -6,6 +6,8 @@ import React, {
   MouseEvent,
   KeyboardEvent,
   useEffect,
+  useState,
+  FocusEvent,
 } from "react";
 import { TreeItem, TreeItemData } from "./TreeItem";
 
@@ -26,8 +28,11 @@ export const Tree = <T extends TreeItemData = TreeItemData>({
   defaultExpanded,
   onClick: onClickProp,
   onKeyDown: onKeyDownProp,
+  onFocus: onFocusProp,
+  onBlur: onBlurProp,
   ...restProps
 }: TreeProps<T>) => {
+  const [focused, setFocused] = useState(false);
   const [{ stateMap }, dispatch] = useReducer(
     reducer,
     initState(data, defaultExpanded)
@@ -61,15 +66,34 @@ export const Tree = <T extends TreeItemData = TreeItemData>({
     [onKeyDownProp]
   );
 
+  const handleFocus = useCallback(
+    (e: FocusEvent<HTMLDivElement>) => {
+      setFocused(true);
+      onFocusProp?.(e);
+    },
+    [onFocusProp]
+  );
+  const handleBlur = useCallback(
+    (e: FocusEvent<HTMLDivElement>) => {
+      setFocused(false);
+      onBlurProp?.(e);
+    },
+    [onBlurProp]
+  );
+
+  console.log({ stateMap });
+
   return (
     <div
       className={cn(className, styles.tree)}
       role="tree"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       {...restProps}
     >
-      <TreeContext.Provider value={stateMap}>
+      <TreeContext.Provider value={{ stateMap, focused }}>
         {data.map((x, i) => (
           <TreeItem key={`${x.label}-${i}`} data={x} path={i.toString()} />
         ))}
