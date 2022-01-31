@@ -39,39 +39,112 @@ const exampleData: TreeItemData[] = [
 
 const exampleData2: TreeItemData[] = [
   {
-    label: "Root 1",
+    label: "Fruits",
     id: "a",
     children: [
       {
-        label: "1-1",
+        label: "Orange",
         id: "a1",
+      },
+      {
+        label: "Pineapple",
+        id: "a2",
+      },
+      {
+        label: "Apples",
+        id: "a3",
         children: [
-          { label: "1-1-1", id: "a11" },
-          { label: "1-1-2", id: "a12" },
+          { label: "Macintosh", id: "a31" },
+          { label: "Granny Smith", id: "a32" },
+          { label: "Fuji", id: "a33" },
+        ],
+      },
+      {
+        label: "Bananas",
+        id: "a4",
+      },
+      {
+        label: "Pears",
+        id: "a5",
+        children: [
+          { label: "Anjou", id: "a51" },
+          { label: "Bartlett", id: "a52" },
+          { label: "Bosc", id: "a53" },
+          { label: "Concorde", id: "a54" },
+          { label: "Seckel", id: "a55" },
+          { label: "Starkrimson", id: "a56" },
         ],
       },
     ],
   },
   {
-    label: "Root 2",
+    label: "Vegetables",
     id: "b",
     children: [
       {
-        label: "2-1",
+        label: "Podded Vegetables",
         id: "b1",
+        children: [
+          { label: "Lentil", id: "b11" },
+          { label: "Pea", id: "b12" },
+          { label: "Peanut", id: "b13" },
+        ],
       },
       {
-        label: "2-2",
+        label: "Bulb and Stem Vegetables",
         id: "b2",
+        children: [
+          { label: "Asparagus", id: "b21" },
+          { label: "Celery", id: "b22" },
+          { label: "Leek", id: "b23" },
+          { label: "Onion", id: "b24" },
+        ],
+      },
+      {
+        label: "Root and Tuberous Vegetables",
+        id: "b3",
+        children: [
+          { label: "Carrot", id: "b31" },
+          { label: "Ginger", id: "b32" },
+          { label: "Parsnip", id: "b33" },
+          { label: "Potato", id: "b34" },
+        ],
       },
     ],
   },
   {
-    label: "Root 3",
+    label: "Grains",
     id: "c",
     children: [
-      { label: "3-1", id: "c1" },
-      { label: "3-2", id: "c2" },
+      {
+        label: "Cereal Grains",
+        id: "c1",
+        children: [
+          { label: "Barley", id: "c11" },
+          { label: "Oats", id: "c12" },
+          { label: "Rice", id: "c13" },
+        ],
+      },
+      {
+        label: "Pseudocereal Grains",
+        id: "c2",
+        children: [
+          { label: "Amaranth", id: "c21" },
+          { label: "Bucketwheat", id: "c22" },
+          { label: "Chia", id: "c23" },
+          { label: "Quinoa", id: "c24" },
+        ],
+      },
+      {
+        label: "Oliseeds",
+        id: "c3",
+        children: [
+          { label: "India Mustard", id: "c31" },
+          { label: "Safflower", id: "c32" },
+          { label: "Flax Seed", id: "c33" },
+          { label: "Poppy Seed", id: "c34" },
+        ],
+      },
     ],
   },
 ];
@@ -111,5 +184,54 @@ export const ToggleData: ComponentStory<typeof Tree> = (args) => {
 };
 
 ToggleData.args = {
+  defaultExpanded: true,
+};
+
+const fileterTest = (label: string, filter: string): boolean => {
+  const regex = new RegExp(filter, "ig");
+  return regex.test(label);
+};
+
+// Based on https://stackoverflow.com/a/45290208/2710486
+const filterTreeData = (data: TreeItemData[], text: string): TreeItemData[] => {
+  const getNodes = (result: TreeItemData[], item: TreeItemData) => {
+    if (fileterTest(item.label, text)) {
+      result.push(item);
+      return result;
+    }
+    if (Array.isArray(item.children)) {
+      const children = item.children.reduce(getNodes, []);
+      if (children.length) result.push({ ...item, children });
+    }
+    return result;
+  };
+
+  return data.reduce(getNodes, []);
+};
+
+export const FilterData: ComponentStory<typeof Tree> = (args) => {
+  const [filterString, setFilterString] = useState("");
+  const handleClick = (_: any, itemId?: string) => {
+    console.log("Item clicked Id", itemId);
+  };
+  const filteredData = useMemo(
+    () => filterTreeData(exampleData2, filterString),
+    [filterString]
+  );
+  return (
+    <div>
+      <label>
+        Filter{" "}
+        <input
+          value={filterString}
+          onChange={(e) => setFilterString(e.currentTarget.value)}
+        />
+      </label>
+      <Tree {...args} data={filteredData} onClick={handleClick} />
+    </div>
+  );
+};
+
+FilterData.args = {
   defaultExpanded: true,
 };
