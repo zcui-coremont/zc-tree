@@ -226,11 +226,16 @@ export const FilterData: ComponentStory<typeof Tree> = (args) => {
           onChange={(e) => setFilterString(e.currentTarget.value)}
         />
       </label>
-      <Tree {...args} data={filteredData} onClick={handleClick} />
+      <Tree
+        {...args}
+        defaultExpanded={filterString ? true : args.defaultExpanded}
+        data={filteredData}
+        onClick={handleClick}
+      />
     </div>
   );
 };
 
 FilterData.args = {
-  defaultExpanded: true,
+  defaultExpanded: false,
 };
