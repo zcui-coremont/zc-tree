@@ -1,0 +1,41 @@
+[data-treeitem-depth="1"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 1);
+}
+[data-treeitem-depth="2"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 2);
+}
+[data-treeitem-depth="3"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 3);
+}
+[data-treeitem-depth="4"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 4);
+}
+[data-treeitem-depth="5"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 5);
+}
+[data-treeitem-depth="6"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 6);
+}
+[data-treeitem-depth="7"] {
+  --tree-item-depth: calc(var(--tree-item-indent-base) * 7);
+}
+
+.treeItem {
+  --tree-item-indent-base: 16px;
+  padding-inline-start: var(--tree-item-depth, 0px);
+}
+
+.treeItemHighlighted {
+  background-color: lightcyan;
+}
+
+.treeItemSelected {
+  background-color: darkgoldenrod;
+  color: white;
+}
+
+.treeItemLeaf {
+  padding-inline-start: calc(
+    var(--tree-item-depth, 0px) + var(--tree-item-indent-base)
+  );
+}

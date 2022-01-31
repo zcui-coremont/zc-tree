@@ -1,9 +1,12 @@
-import React, { useMemo, useState } from "react";
+import cn from "classnames";
+import React, { ForwardedRef, forwardRef, useMemo, useState } from "react";
 
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
 import { Tree } from "./Tree";
-import { TreeItemData } from "./TreeItem";
+import { BasicTreeItemNodeProps, TreeItem, TreeItemData } from "./TreeItem";
+
+import styles from "./Tree.stories.module.css";
 
 export default {
   title: "Tree",
@@ -27,6 +30,40 @@ const exampleData: TreeItemData[] = [
     ],
   },
   { label: "Item B", id: "b" },
+  {
+    label: "Item C",
+    id: "c",
+    children: [
+      { label: "Child C1", id: "c1" },
+      { label: "Child C2", id: "c2" },
+    ],
+  },
+];
+
+interface CustomTreeItemData extends TreeItemData {
+  loading?: boolean;
+}
+
+const customTypeData: CustomTreeItemData[] = [
+  {
+    label: "Item A",
+    id: "a",
+    loading: true,
+    children: [
+      {
+        label: "Child A1",
+        id: "a1",
+        loading: false,
+
+        children: [
+          { label: "Child A11", id: "a11", loading: true },
+          { label: "Child A12", id: "a12", loading: false },
+        ],
+      },
+      { label: "Child A2", id: "a2" },
+    ],
+  },
+  { label: "Item B", id: "b", loading: true },
   {
     label: "Item C",
     id: "c",
@@ -177,7 +214,12 @@ export const ToggleData: ComponentStory<typeof Tree> = (args) => {
       <button onClick={() => setDataSetNumber((x) => (x === 1 ? 2 : 1))}>
         toggle data
       </button>
-      <Tree {...args} data={dataSet} onClick={handleClick} />
+      <Tree
+        {...args}
+        data={dataSet}
+        onClick={handleClick}
+        key={dataSetNumber} // Use different key to rerender a new instance
+      />
     </div>
   );
 };
@@ -228,6 +270,7 @@ export const FilterData: ComponentStory<typeof Tree> = (args) => {
       </label>
       <Tree
         {...args}
+        key={filterString} // Use different key to rerender a new instance
         defaultExpanded={filterString ? true : args.defaultExpanded}
         data={filteredData}
         onClick={handleClick}
@@ -238,4 +281,51 @@ export const FilterData: ComponentStory<typeof Tree> = (args) => {
 
 FilterData.args = {
   defaultExpanded: false,
+};
+
+const CustomTreeItemNodeBase = (
+  {
+    highlighted,
+    selected,
+    expanded,
+    hasChild,
+    depth,
+    data,
+    treeFocused,
+    ...restProps
+  }: BasicTreeItemNodeProps<CustomTreeItemData>,
+  ref: ForwardedRef<HTMLDivElement>
+) => {
+  const leafNode = !data.children?.length;
+  const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
+
+  return (
+    <div
+      className={cn(styles.treeItem, {
+        [styles.treeItemHighlighted]: highlighted && treeFocused,
+        [styles.treeItemSelected]: selected,
+        [styles.treeItemLeaf]: leafNode,
+      })}
+      {...restProps}
+      ref={ref}
+    >
+      {icon}
+      {data.label}
+      {data.loading ? "⌛" : null}
+    </div>
+  );
+};
+
+const CustomTreeItem = forwardRef(CustomTreeItemNodeBase);
+
+export const CustomTreeItemNode: ComponentStory<typeof Tree> = (args) => {
+  return (
+    <div>
+      <Tree {...args} data={customTypeData} TreeItemNode={CustomTreeItem} />
+    </div>
+  );
+};
+
+CustomTreeItemNode.args = {
+  defaultExpanded: true,
 };
