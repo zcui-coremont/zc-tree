@@ -22,7 +22,7 @@ export function initState<T extends TreeItemData>(
   const innerLoopData = (x: T, i: number, depth: number, path: string) => {
     const newPath = path + "-" + i.toString();
     const newDepth = depth + 1;
-    const hasChild = !!x.children?.length;
+    const hasChild = Array.isArray(x.children) && x.children.length > 0;
     stateMap[newPath] = {
       highlighted: false,
       selected: false,

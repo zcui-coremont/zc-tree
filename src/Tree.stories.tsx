@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Tree, TreeProps } from "./Tree";
+import { Tree } from "./Tree";
 import { TreeItemData } from "./TreeItem";
 
 export default {
@@ -150,7 +150,7 @@ const exampleData2: TreeItemData[] = [
 ];
 
 export const Example: ComponentStory<typeof Tree> = (args) => {
-  const handleClick = (_: any, itemId?: string) => {
+  const handleClick = (_: unknown, itemId?: string) => {
     console.log("Item clicked Id", itemId);
   };
   console.log({ args });
@@ -170,7 +170,7 @@ export const ToggleData: ComponentStory<typeof Tree> = (args) => {
       return exampleData2;
     }
   }, [dataSetNumber]);
-  const handleClick = (_: any, itemId?: string) => {
+  const handleClick = (_: unknown, itemId?: string) => {
     console.log("Item clicked Id", itemId);
   };
   return (
@@ -211,7 +211,7 @@ const filterTreeData = (data: TreeItemData[], text: string): TreeItemData[] => {
 
 export const FilterData: ComponentStory<typeof Tree> = (args) => {
   const [filterString, setFilterString] = useState("");
-  const handleClick = (_: any, itemId?: string) => {
+  const handleClick = (_: unknown, itemId?: string) => {
     console.log("Item clicked Id", itemId);
   };
   const filteredData = useMemo(

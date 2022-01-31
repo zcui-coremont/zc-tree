@@ -1,17 +1,8 @@
 import cn from "classnames";
-import React, {
-  useState,
-  HTMLAttributes,
-  useEffect,
-  MouseEvent,
-  useCallback,
-  useContext,
-  useRef,
-} from "react";
+import React, { HTMLAttributes, useEffect, useContext, useRef } from "react";
 import { TreeContext } from "./TreeContext";
 
 import styles from "./TreeItem.module.css";
-import { useControlled } from "./utils/useControlled";
 
 export interface TreeItemData {
   label: string;
@@ -38,21 +29,13 @@ export interface TreeItemProps<T extends TreeItemData> // TreeItemState,
 
 export const TreeItem = <T extends TreeItemData>({
   data,
-  onClick: onClickProp,
-  onKeyDown: onKeyDownProp,
   path,
   ...restProps
 }: TreeItemProps<T>) => {
   const treeState = useContext(TreeContext);
   // console.log(path, treeState[path]);
   const itemState = treeState[path];
-  const {
-    expanded,
-    hasChild,
-    selected,
-    depth = 0,
-    highlighted,
-  } = itemState || {}; // {} when data is empty
+  const { expanded, selected, depth = 0, highlighted } = itemState || {}; // {} when data is empty
 
   const leafNode = !data.children?.length;
   const icon = !leafNode ? (expanded ? "▼" : "▶") : null;
