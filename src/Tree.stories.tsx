@@ -177,7 +177,12 @@ export const ToggleData: ComponentStory<typeof Tree> = (args) => {
       <button onClick={() => setDataSetNumber((x) => (x === 1 ? 2 : 1))}>
         toggle data
       </button>
-      <Tree {...args} data={dataSet} onClick={handleClick} />
+      <Tree
+        {...args}
+        data={dataSet}
+        onClick={handleClick}
+        key={dataSetNumber} // Use different key to rerender a new instance
+      />
     </div>
   );
 };
