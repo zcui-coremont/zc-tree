@@ -82,7 +82,11 @@ export const TreeItem = <T extends TreeItemData>({
   path,
   ...restProps
 }: TreeItemProps<T>) => {
-  const { stateMap, focused } = useContext(TreeContext);
+  const {
+    stateMap,
+    focused,
+    TreeItemNode = BasicTreeItemNode,
+  } = useContext(TreeContext);
   const itemState = stateMap[path];
   const { expanded, selected, depth = 0, highlighted } = itemState || {}; // {} when data is empty
 
@@ -104,7 +108,7 @@ export const TreeItem = <T extends TreeItemData>({
   }
   return (
     <div role="group" {...restProps}>
-      <BasicTreeItemNode
+      <TreeItemNode
         treeFocused={focused}
         data={data}
         {...itemState}
