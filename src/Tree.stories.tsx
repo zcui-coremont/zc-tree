@@ -270,6 +270,7 @@ export const FilterData: ComponentStory<typeof Tree> = (args) => {
       </label>
       <Tree
         {...args}
+        key={filterString} // Use different key to rerender a new instance
         defaultExpanded={filterString ? true : args.defaultExpanded}
         data={filteredData}
         onClick={handleClick}
